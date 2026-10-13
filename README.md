@@ -1,11 +1,11 @@
-# Sistema de Inscripción a Talleres
+# Sistema de Inscripción a Talleres de inscripción 
 
 Aplicación Angular 17 (NgModule) con Template Driven Forms.
 
 ## Ejecutar
-```
+
 npm install
 npm start
-```
+
 Se abre en http://localhost:4200
 
