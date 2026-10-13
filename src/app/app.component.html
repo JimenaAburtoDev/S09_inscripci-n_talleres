@@ -1,0 +1,204 @@
+<main class="contenedor">
+  <header class="encabezado">
+    <h1>Sistema de Inscripción a Talleres</h1>
+    <p>Instituto · Talleres tecnológicos</p>
+  </header>
+
+  <!-- ================= FORMULARIO ================= -->
+  <section class="tarjeta" id="formulario" [class.editando]="modoEdicion">
+    <h2 *ngIf="!modoEdicion">Formulario de inscripción</h2>
+    <h2 *ngIf="modoEdicion">✏️ Editando inscripción #{{ editandoNumero | number:'3.0-0' }}</h2>
+
+    <form #formInscripcion="ngForm" (ngSubmit)="guardar(formInscripcion)" novalidate>
+      <div class="grid">
+
+        <!-- Nombre completo -->
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input id="nombre" type="text" name="nombre" placeholder="Ej: Ana Torres"
+                 [(ngModel)]="nuevaInscripcion.nombre"
+                 #nombre="ngModel" required minlength="3"
+                 [class.invalido]="nombre.invalid && nombre.touched">
+          <div class="error" *ngIf="nombre.invalid && nombre.touched">
+            <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
+            <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Correo institucional -->
+        <div class="campo">
+          <label for="correo">Correo institucional</label>
+          <input id="correo" type="email" name="correo" placeholder="usuario@instituto.edu"
+                 [(ngModel)]="nuevaInscripcion.correo"
+                 #correo="ngModel" required email
+                 [class.invalido]="correo.invalid && correo.touched">
+          <div class="error" *ngIf="correo.invalid && correo.touched">
+            <span *ngIf="correo.errors?.['required']">El correo es obligatorio.</span>
+            <span *ngIf="correo.errors?.['email']">Ingresa un correo con formato válido.</span>
+          </div>
+        </div>
+
+        <!-- Especialidad -->
+        <div class="campo">
+          <label for="especialidad">Especialidad</label>
+          <select id="especialidad" name="especialidad"
+                  [(ngModel)]="nuevaInscripcion.especialidad"
+                  #especialidad="ngModel" required
+                  [class.invalido]="especialidad.invalid && especialidad.touched">
+            <option value="" disabled>Selecciona una opción</option>
+            <option *ngFor="let e of especialidades" [value]="e">{{ e }}</option>
+            <option [value]="OTRO">Otro (escribir otra especialidad)</option>
+          </select>
+          <div class="error" *ngIf="especialidad.invalid && especialidad.touched">
+            Selecciona una especialidad.
+          </div>
+        </div>
+
+        <!-- Otra especialidad (solo si eligió "Otro") -->
+        <div class="campo" *ngIf="nuevaInscripcion.especialidad === OTRO">
+          <label for="otraEspecialidad">¿Cuál especialidad?</label>
+          <input id="otraEspecialidad" type="text" name="otraEspecialidad"
+                 placeholder="Ej: Ciberseguridad"
+                 [(ngModel)]="nuevaInscripcion.otraEspecialidad"
+                 #otra="ngModel" required minlength="3"
+                 [class.invalido]="otra.invalid && otra.touched">
+          <div class="error" *ngIf="otra.invalid && otra.touched">
+            <span *ngIf="otra.errors?.['required']">Escribe el nombre de la especialidad.</span>
+            <span *ngIf="otra.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Modalidad -->
+        <div class="campo">
+          <label for="modalidad">Modalidad</label>
+          <select id="modalidad" name="modalidad"
+                  [(ngModel)]="nuevaInscripcion.modalidad"
+                  #modalidad="ngModel" required
+                  [class.invalido]="modalidad.invalid && modalidad.touched">
+            <option value="" disabled>Selecciona una opción</option>
+            <option *ngFor="let m of modalidades" [value]="m">{{ m }}</option>
+          </select>
+          <div class="error" *ngIf="modalidad.invalid && modalidad.touched">
+            Selecciona una modalidad.
+          </div>
+        </div>
+
+        <!-- Nivel de experiencia -->
+        <div class="campo">
+          <label for="nivel">Nivel de experiencia</label>
+          <select id="nivel" name="nivel"
+                  [(ngModel)]="nuevaInscripcion.nivel"
+                  #nivel="ngModel" required
+                  [class.invalido]="nivel.invalid && nivel.touched">
+            <option value="" disabled>Selecciona una opción</option>
+            <option *ngFor="let n of niveles" [value]="n">{{ n }}</option>
+          </select>
+          <div class="error" *ngIf="nivel.invalid && nivel.touched">
+            Selecciona un nivel de experiencia.
+          </div>
+        </div>
+
+        <!-- Turno (radio buttons) -->
+        <div class="campo">
+          <label>Turno</label>
+          <div class="radios">
+            <label class="radio">
+              <input type="radio" name="turno" value="Mañana"
+                     [(ngModel)]="nuevaInscripcion.turno" #turno="ngModel" required>
+              <span>🌅 Mañana</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="turno" value="Noche"
+                     [(ngModel)]="nuevaInscripcion.turno" required>
+              <span>🌙 Noche</span>
+            </label>
+          </div>
+          <div class="error" *ngIf="turno.invalid && formInscripcion.submitted">
+            Selecciona un turno.
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn btn-primario" [disabled]="formInscripcion.invalid">
+          {{ modoEdicion ? 'Guardar cambios' : 'Registrar inscripción' }}
+        </button>
+        <button type="button" class="btn btn-secundario" *ngIf="modoEdicion"
+                (click)="cancelarEdicion(formInscripcion)">
+          Cancelar edición
+        </button>
+        <button type="button" class="btn btn-secundario" *ngIf="!modoEdicion"
+                (click)="limpiarFormulario(formInscripcion)">
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ================= RESUMEN ================= -->
+  <section class="resumen">
+    <div class="indicador total">
+      <span class="numero">{{ totalInscritos }}</span>
+      <span class="texto">Total de inscritos</span>
+    </div>
+    <div class="indicador manana">
+      <span class="numero">{{ totalManana }}</span>
+      <span class="texto">Turno mañana</span>
+    </div>
+    <div class="indicador noche">
+      <span class="numero">{{ totalNoche }}</span>
+      <span class="texto">Turno noche</span>
+    </div>
+  </section>
+
+  <!-- ================= TABLA ================= -->
+  <section class="tarjeta">
+    <h2>Participantes inscritos</h2>
+
+    <p class="vacio" *ngIf="listaInscripciones.length === 0">
+      Aún no hay participantes registrados.
+    </p>
+
+    <div class="tabla-wrap" *ngIf="listaInscripciones.length > 0">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>N° Inscripción</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Especialidad</th>
+            <th>Turno</th>
+            <th>Modalidad</th>
+            <th>Nivel</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of listaInscripciones" [class.fila-editando]="item.numero === editandoNumero">
+            <td><strong>#{{ item.numero | number:'3.0-0' }}</strong></td>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.correo }}</td>
+            <td><span [class]="claseEspecialidad(item.especialidad)">{{ item.especialidad }}</span></td>
+            <td>
+              <span class="badge" [class.badge-manana]="item.turno === 'Mañana'"
+                                  [class.badge-noche]="item.turno === 'Noche'">
+                {{ item.turno }}
+              </span>
+            </td>
+            <td>{{ item.modalidad }}</td>
+            <td>{{ item.nivel }}</td>
+            <td class="celda-acciones">
+              <button type="button" class="btn btn-editar" (click)="editarInscripcion(item)">
+                Editar
+              </button>
+              <button type="button" class="btn btn-eliminar"
+                      (click)="eliminarInscripcion(item.numero, formInscripcion)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
