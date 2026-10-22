@@ -25,16 +25,44 @@
           </div>
         </div>
 
+        <!-- DNI -->
+        <div class="campo">
+          <label for="dni">DNI</label>
+          <input id="dni" type="text" name="dni" placeholder="8 dígitos" inputmode="numeric"
+                 [(ngModel)]="nuevaInscripcion.dni"
+                 #dni="ngModel" required [pattern]="PATRON_DNI"
+                 [class.invalido]="dni.invalid && dni.touched">
+          <div class="error" *ngIf="dni.invalid && dni.touched">
+            <span *ngIf="dni.errors?.['required']">El DNI es obligatorio.</span>
+            <span *ngIf="dni.errors?.['pattern']">El DNI debe tener exactamente 8 dígitos numéricos.</span>
+          </div>
+        </div>
+
+        <!-- Edad -->
+        <div class="campo">
+          <label for="edad">Edad</label>
+          <input id="edad" type="number" name="edad" placeholder="Mínimo {{ EDAD_MINIMA }} años"
+                 [(ngModel)]="nuevaInscripcion.edad"
+                 #edad="ngModel" required [min]="EDAD_MINIMA" [pattern]="PATRON_EDAD"
+                 [class.invalido]="edad.invalid && edad.touched">
+          <div class="error" *ngIf="edad.invalid && edad.touched">
+            <span *ngIf="edad.errors?.['required']">La edad es obligatoria.</span>
+            <span *ngIf="edad.errors?.['min']">La edad mínima para inscribirse es {{ EDAD_MINIMA }} años.</span>
+            <span *ngIf="edad.errors?.['pattern'] && !edad.errors?.['min']">Ingresa una edad válida (número entero).</span>
+          </div>
+        </div>
+
         <!-- Correo institucional -->
         <div class="campo">
           <label for="correo">Correo institucional</label>
           <input id="correo" type="email" name="correo" placeholder="usuario@instituto.edu"
                  [(ngModel)]="nuevaInscripcion.correo"
-                 #correo="ngModel" required email
+                 #correo="ngModel" required email [pattern]="PATRON_CORREO_INSTITUCIONAL"
                  [class.invalido]="correo.invalid && correo.touched">
           <div class="error" *ngIf="correo.invalid && correo.touched">
             <span *ngIf="correo.errors?.['required']">El correo es obligatorio.</span>
-            <span *ngIf="correo.errors?.['email']">Ingresa un correo con formato válido.</span>
+            <span *ngIf="correo.errors?.['email'] && !correo.errors?.['required']">Ingresa un correo con formato válido.</span>
+            <span *ngIf="correo.errors?.['pattern'] && !correo.errors?.['email'] && !correo.errors?.['required']">Usa tu correo institucional (dominio .edu o .edu.pe).</span>
           </div>
         </div>
 
@@ -113,14 +141,14 @@
               <span>🌙 Noche</span>
             </label>
           </div>
-          <div class="error" *ngIf="turno.invalid && formInscripcion.submitted">
+          <div class="error" *ngIf="turno.invalid && (turno.touched || formInscripcion.submitted)">
             Selecciona un turno.
           </div>
         </div>
       </div>
 
       <div class="acciones">
-        <button type="submit" class="btn btn-primario" [disabled]="formInscripcion.invalid">
+        <button type="submit" class="btn btn-primario">
           {{ modoEdicion ? 'Guardar cambios' : 'Registrar inscripción' }}
         </button>
         <button type="button" class="btn btn-secundario" *ngIf="modoEdicion"
@@ -165,6 +193,8 @@
           <tr>
             <th>N° Inscripción</th>
             <th>Nombre</th>
+            <th>DNI</th>
+            <th>Edad</th>
             <th>Correo</th>
             <th>Especialidad</th>
             <th>Turno</th>
@@ -177,6 +207,8 @@
           <tr *ngFor="let item of listaInscripciones" [class.fila-editando]="item.numero === editandoNumero">
             <td><strong>#{{ item.numero | number:'3.0-0' }}</strong></td>
             <td>{{ item.nombre }}</td>
+            <td>{{ item.dni }}</td>
+            <td>{{ item.edad }}</td>
             <td>{{ item.correo }}</td>
             <td><span [class]="claseEspecialidad(item.especialidad)">{{ item.especialidad }}</span></td>
             <td>

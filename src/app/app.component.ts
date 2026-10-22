@@ -4,6 +4,8 @@ import { NgForm } from '@angular/forms';
 interface Inscripcion {
   numero: number;
   nombre: string;
+  dni: string;
+  edad: number;
   correo: string;
   especialidad: string;
   turno: string;
@@ -23,6 +25,16 @@ export class AppComponent {
   modalidades: string[] = ['Presencial', 'Virtual'];
   niveles: string[] = ['Principiante', 'Intermedio', 'Avanzado'];
 
+  // Expresiones regulares de validación (reto S11 | M12)
+  // DNI: exactamente 8 dígitos numéricos
+  readonly PATRON_DNI = '^[0-9]{8}$';
+  // Edad: solo números enteros
+  readonly PATRON_EDAD = '^[0-9]+$';
+  // Correo institucional: usuario@dominio.edu  o  usuario@dominio.edu.pe
+  readonly PATRON_CORREO_INSTITUCIONAL =
+    '^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.edu(\\.pe)?$';
+  readonly EDAD_MINIMA = 15;
+
   // Objeto vinculado al formulario
   nuevaInscripcion = this.crearVacia();
 
@@ -38,6 +50,8 @@ export class AppComponent {
   private crearVacia() {
     return {
       nombre: '',
+      dni: '',
+      edad: null as number | null,
       correo: '',
       especialidad: '',
       otraEspecialidad: '',
@@ -59,12 +73,17 @@ export class AppComponent {
   }
 
   guardar(formulario: NgForm): void {
+    // Si hay errores: marcar TODOS los controles como "touched" para que se
+    // muestren de inmediato las alertas, y detener el guardado.
     if (formulario.invalid) {
+      formulario.form.markAllAsTouched();
       return;
     }
 
     const datos = {
       nombre: this.nuevaInscripcion.nombre.trim(),
+      dni: this.nuevaInscripcion.dni.trim(),
+      edad: Number(this.nuevaInscripcion.edad),
       correo: this.nuevaInscripcion.correo.trim(),
       especialidad: this.especialidadFinal(),
       turno: this.nuevaInscripcion.turno,
@@ -92,6 +111,8 @@ export class AppComponent {
     const esPredefinida = this.especialidades.includes(item.especialidad);
     this.nuevaInscripcion = {
       nombre: item.nombre,
+      dni: item.dni,
+      edad: item.edad,
       correo: item.correo,
       especialidad: esPredefinida ? item.especialidad : this.OTRO,
       otraEspecialidad: esPredefinida ? '' : item.especialidad,
